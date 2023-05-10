@@ -1,0 +1,35 @@
+Trova perchè non mi da il risultato
+# Clienti persi = 
+// Definizione del periodo di tempo in cui i clienti sono considerati persi (1 anno)
+---VAR PeriodLost = -1
+
+VAR LastDateLost =
+    CALCULATE (
+        MAX ( Date_Calendar[Date] ),
+        ALLSELECTED ( Date_Calendar )
+    )
+
+VAR CustomersWithLostDate =
+    CALCULATETABLE (
+        ADDCOLUMNS (
+            VALUES ( xSG2_Vendite_Con_MdC[Cd_CF] ),
+            "@LostCustomerDate", 
+            DATEADD(Date_Calendar[Date], -1, YEAR)
+
+        ),
+        ALLSELECTED ( xSG2_Clienti ),
+        Date_Calendar[Date] <= LastDateLost
+    )
+
+VAR LostCustomers =
+    FILTER (
+        CustomersWithLostDate,
+        [@LostCustomerDate]
+            IN VALUES ( Date_Calendar[Date] )
+    )
+
+VAR Result =
+    COUNTROWS ( LostCustomers )
+
+RETURN
+    Result
